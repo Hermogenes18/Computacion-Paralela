@@ -1,0 +1,6 @@
+thread 1 Execution time = 0.000344 seconds
+thread 2 Execution time = 0.000283 seconds
+thread 4 Execution time = 0.004805 seconds
+thread 8 Execution time = 0.005669 seconds
+thread 16 Execution time = 0.017084 seconds
+thread 32 Execution time = 0.038794 seconds
