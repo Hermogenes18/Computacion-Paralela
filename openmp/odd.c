@@ -1,67 +1,59 @@
-/*
-       To compile:-
-        gcc -fopenmp file_name.c
-*/
-
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
-int n=10;
-int main()
+#include <time.h> 
+
+
+//#define thread_count  32
+#define n 100000
+
+int i,phase,j,tmp;
+
+void odd(int a[n]);
+
+int main(int argc, char* argv[])
 {
-    int i,j,temp;
-    int a[]= {9,8,7,6,5,4,3,2,1,0};
 
-    /*printf("\nEnter 10 Array Elements\n");
-    for(i=0;i<n;i++)
-    {
-        scanf("%d",&a[i]);
-    }*/
-   
-    printf("\nArray Elements Before Sorting\n");
-   
-    for(i=0;i<n;i++)
-    printf("\na[%d]=%d",i,a[i]);
+    int a[n];
+    int thread_count = strtol(argv[1], NULL, 10);
+  
+    srand(time(0));
+    for(int i=0;i<n;i++)
+    {	
+    	int random=rand();
+    	a[i]=random;
+    }
 
+}
+
+void odd(int a[n]){
+	int thread_count = omp_get_num_threads();
     double start_time;
     start_time = omp_get_wtime();
 
-   
-    for(i=0;i<n;i++)
-    {   
-        if(i%2==0)
-        {
-            #pragma omp parallel for private(temp,j) shared(a)
-            for(j=0;j<n-1;j+=2)
-            {
-                if(a[j]> a[j+1])
-                {
-                    temp = a[j];
-                    a[j] = a[j+1];
-                    a[j+1] = temp;
-                }
-            }
-        }
-        else
-        {
-            #pragma omp parallel for private(temp,j) shared(a)
-            for(j=1;j<n-1;j+=2)
-            {
-                if(a[j]> a[j+1])
-                {
-                    temp = a[j];
-                    a[j] = a[j+1];
-                    a[j+1] = temp;
-                }
-            }
-        }
-       
-    }
+	for (phase = 0; phase < n; phase++) {
+		if (phase % 2 == 0)
+	# pragma omp parallel for num_threads(thread_count)  \
+			default(none) shared(a, n) private(i, tmp)
+		for (i = 1; i < n; i += 2) {
+			if (a[i-1] > a[i]) {
+				tmp = a[i-1];
+				a[i-1] = a[i];
+				a[i] = tmp;
+			}
+		}
+	else
+	# pragma omp parallel for num_threads(thread_count) \
+		default(none) shared(a, n) private(i, tmp)
+	for (i = 1; i < n-1; i += 2) {
+		if (a[i] > a[i+1]) {
+			tmp = a[i+1];
+			a[i+1] = a[i];
+			a[i] = tmp;
+		}
+		}
+	}
 
-    printf("\n Execution time = %lf seconds\n", omp_get_wtime() - start_time);
-
-    printf("\n\nSorted Array");
-    for(i=0;i<n;i++)
-    printf("\na[%d]=%d",i,a[i]);
-    printf("\n\n");
+	printf("\nNumero de hilos: %d \n",thread_count);
+	printf("Execution time = %lf seconds\n", omp_get_wtime() - start_time);
 }
